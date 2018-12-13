@@ -1,0 +1,97 @@
+public static void main(String[] args) {
+    // Gauss消去(前進+後進)
+        int N = c.length;
+        //コピーする
+        double [][]A = new double[N][N];
+        double []b = new double[N];
+        A = copyMat(a);
+        b= copyVec(c);
+        double [] d = Forward_sub(A,b);
+        double[] x = Backward_sub(A,d);
+        return x;
+    }
+
+    //前進消去過程
+    public static double[] Forward_sub(double A[][] ,double b[]){
+        int N = A.length;
+        double alpha = 0.0;
+        for(int k=0 ; k<N-1;k++){
+            for(int i= k+1; i<N; i++){
+                alpha = A[i][k] / A[k][k];
+                for(int j=k+1;j<N;j++){
+                    A[i][j] = A[i][j] - alpha * A[k][j];
+                    A[i][k] = 0.0;
+                }
+                b[i] = b[i] - alpha * b[k];
+            }
+        }
+        return b;
+    }
+
+    //後退代入過程
+    public static double[] Backward_sub(double A[][],double y[]){
+    int N = A.length;
+    for(int k=N-1; k>=0;k--){
+        for(int p=k+1; p<N; p++){
+            y[k] =y[k] - A[k][p] * y[p];
+        }
+    y[k] = y[k] / A[k][k];
+    }
+    return y;
+    }
+
+    //k列目に対して絶対値最大値をpivotに選ぶ
+    public static int Pivot(int k , double[][]A){
+        int n = A.length;
+        double [] a = new double[n];//空の配列
+        double max =0.0;
+        int pivot = k;
+        for(int i=0;i<n;i++){//i行k列目の要素を配列に入れる([0][3],[1][3],[2][3],…)
+            a[i]= A[i][k];
+        }
+        for(int j=k;j<n;j++){//配列の要素を順に見て最大値を見つける
+            if(Math.abs(a[j])>Math.abs(max)){
+                max=a[j];
+                pivot=j;
+            }
+        }
+        return pivot;
+    }
+
+    //ベクトルbのk行目とm行目を入れ替える
+    public static double[] swapVec(double[] b0,int m,int k){
+        double[]b = new double[b0.length];
+        b = copyVec(b0);
+        double temp = b[k];
+        b[k] = b[m];
+        b[m] = temp;
+        return b;
+    }
+
+    //行列Aのk行目とm行目を入れ替える
+    public static double[][] swapMat(double[][] A0,int m,int k){
+        double[][]A = new double[A0.length][A0[0].length];
+        A = copyMat(A0);
+        double []temp = new double[A.length];
+        for(int i=0;i<A.length;i++){
+            temp[i] = A[k][i];
+            A[k][i] = A[m][i];
+            A[m][i] = temp[i];
+        }
+        return A;
+    }
+
+    //ピボット選択付きGauss消去
+    public static double[] pivotGauss(double J[][] ,double[]f){
+        int n = J.length;//ベクトル要素数
+        double [][] J2 = new double[n][n];//pivot後のヤコビ行列
+        double [] f2 = new double[n];//pivot後の右辺項
+        double [] del = new double[n];
+        for(int k=0;k<n-1;k++){
+        int m =Calc.Pivot(k, J);//k列目に対して絶対値最大値をmに選ぶ
+        J2 = Calc.swapMat(J,m,k);
+        f2 = Calc.swapVec(f, m, k);
+        del = Calc.Gauss(J2, f2);
+        }
+        return del;
+    }
